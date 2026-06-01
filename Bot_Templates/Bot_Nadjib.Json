@@ -1,0 +1,180 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meta-webhook-kalyx",
+        "options": {}
+      },
+      "id": "b9bba8ad-735b-4b27-a43d-479c6b0cf476",
+      "name": "Meta Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        208
+      ],
+      "webhookId": "b6b141f4-7e53-47b3-82db-bbd6701d8fdd"
+    },
+    {
+      "parameters": {
+        "dataType": "boolean",
+        "value1": "={{ $hasBinaryData }}",
+        "fallbackOutput": 1
+      },
+      "id": "76bd0785-4196-41aa-8b65-7cce0289698c",
+      "name": "Image/Text Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        208
+      ],
+      "notesInFlow": true,
+      "notes": "Sépare les messages avec images du texte brut"
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4o-mini",
+        "options": {},
+        "requestOptions": {}
+      },
+      "id": "ffb1ce6e-0cc0-48b1-a40c-f4eacc7648a2",
+      "name": "GPT Vision (Image)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        80
+      ],
+      "notesInFlow": true,
+      "notes": "Analyse le screenshot + extrait les 5 datas"
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "model": "gpt-4o-mini",
+        "options": {},
+        "requestOptions": {}
+      },
+      "id": "160b49fa-c82d-4acc-a9ec-5cd1663884dd",
+      "name": "GPT Text (No Image)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        320
+      ],
+      "notesInFlow": true,
+      "notes": "Gère la conv texte + extrait les 5 datas"
+    },
+    {
+      "parameters": {
+        "operation": "lookup",
+        "documentId": {
+          "__rl": true,
+          "value": "VOTRE_SPREADSHEET_ID_ICI",
+          "mode": "id"
+        }
+      },
+      "id": "49dc6b8a-a8fa-49ef-ac1f-8fec2dae9c19",
+      "name": "Google Sheets (Stock/Data)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        80,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "guildId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "5a922a1d-1660-45b4-b192-ec1ed9bb0277",
+      "name": "Discord Routing",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        320,
+        208
+      ],
+      "notesInFlow": true,
+      "webhookId": "71cfe07e-08aa-408f-b93a-53d2aab83d58",
+      "notes": "Envoie le récap au client"
+    }
+  ],
+  "connections": {
+    "Meta Webhook": {
+      "main": [
+        [
+          {
+            "node": "Image/Text Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image/Text Router": {
+      "main": [
+        [
+          {
+            "node": "GPT Vision (Image)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GPT Text (No Image)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Vision (Image)": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets (Stock/Data)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT Text (No Image)": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets (Stock/Data)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets (Stock/Data)": {
+      "main": [
+        [
+          {
+            "node": "Discord Routing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "92ca8897f82cf777ad943f235af924fe0ae560b15d752396eb2974824d84122f"
+  }
+}
